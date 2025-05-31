@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Storytelling Platform</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <button id="editorBtn">Editor Mode</button>
+    <button id="readerBtn">Reader Mode</button>
+  </nav>
+  <div id="editor" class="container">
+    <h1>Create Your Story</h1>
+    <form id="nodeForm">
+      <label for="nodeText">Story Segment:</label>
+      <textarea id="nodeText" required></textarea>
+      <label for="choices">Choices (comma-separated):</label>
+      <input type="text" id="choices" placeholder="Choice 1, Choice 2">
+      <button type="submit">Add Node</button>
+    </form>
+    <div id="nodeList"></div>
+  </div>
+  <div id="reader" class="container hidden">
+    <h1>Read the Story</h1>
+    <div id="currentNode"></div>
+    <div id="choiceButtons"></div>
+  </div>
+  <canvas id="storyGraph" width="800" height="400"></canvas>
+  <script src="script.js"></script>
+</body>
+</html>
