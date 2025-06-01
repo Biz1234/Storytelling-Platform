@@ -1,6 +1,7 @@
 // Initialize story data
 let story = { nodes: [] };
 let currentNodeId = 1;
+let editingNodeId = null; // Track node being edited
 
 // DOM elements
 const nodeForm = document.getElementById('nodeForm');
@@ -35,24 +36,38 @@ document.getElementById('readerBtn').addEventListener('click', () => {
   displayCurrentNode();
 });
 
-// Handle form submission to add new nodes
+// Handle form submission for adding or editing nodes
 nodeForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const nodeText = document.getElementById('nodeText').value;
   const choicesInput = document.getElementById('choices').value.split(',').map(c => c.trim());
   const choiceLinks = document.getElementById('choiceLinks').value.split(',').map(id => parseInt(id.trim()) || null);
 
-  // Create new node
-  const newNode = {
-    id: story.nodes.length + 1,
-    text: nodeText,
-    choices: choicesInput.map((text, index) => ({
-      text,
-      nextNodeId: choiceLinks[index] || null
-    }))
-  };
+  if (editingNodeId) {
+    // Update existing node
+    const node = story.nodes.find(n => n.id === editingNodeId);
+    if (node) {
+      node.text = nodeText;
+      node.choices = choicesInput.map((text, index) => ({
+        text,
+        nextNodeId: choiceLinks[index] || null
+      }));
+      editingNodeId = null;
+      nodeForm.querySelector('button[type="submit"]').textContent = 'Add Node';
+    }
+  } else {
+    // Create new node
+    const newNode = {
+      id: story.nodes.length + 1,
+      text: nodeText,
+      choices: choicesInput.map((text, index) => ({
+        text,
+        nextNodeId: choiceLinks[index] || null
+      }))
+    };
+    story.nodes.push(newNode);
+  }
 
-  story.nodes.push(newNode);
   saveStory();
   nodeForm.reset();
   displayNodes();
@@ -67,10 +82,23 @@ function displayNodes() {
     nodeDiv.innerHTML = `
       <p><strong>Node ${node.id}</strong>: ${node.text}</p>
       <p>Choices: ${node.choices.map(c => `${c.text} -> ${c.nextNodeId || 'None'}`).join(', ')}</p>
+      <button onclick="editNode(${node.id})">Edit</button>
       <button onclick="deleteNode(${node.id})">Delete</button>
     `;
     nodeList.appendChild(nodeDiv);
   });
+}
+
+// Edit a node
+function editNode(id) {
+  const node = story.nodes.find(n => n.id === id);
+  if (node) {
+    editingNodeId = id;
+    document.getElementById('nodeText').value = node.text;
+    document.getElementById('choices').value = node.choices.map(c => c.text).join(', ');
+    document.getElementById('choiceLinks').value = node.choices.map(c => c.nextNodeId || '').join(', ');
+    nodeForm.querySelector('button[type="submit"]').textContent = 'Save Changes';
+  }
 }
 
 // Delete a node and update references
